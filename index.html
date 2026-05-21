@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>屯門信仰之絆 - AVG 網頁版</title>
+    <style>
+        /* 基礎樣式：鎖定 16:9 的 AVG 遊戲視窗 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 960px;
+            height: 540px;
+            position: relative;
+            background-color: #222;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* 數值面板（除錯用，正式版可用 CSS 隱藏） */
+        #debug-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        /* 角色立繪區域 */
+        #sprite-container {
+            position: absolute;
+            bottom: 140px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 100px;
+            box-sizing: border-box;
+        }
+
+        .sprite {
+            height: 280px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .sprite.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 港式 AVG 對話框 */
+        #textbox {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 120px;
+            background: rgba(20, 25, 30, 0.85);
+            border: 2px solid #5c92c2;
+            border-radius: 8px;
+            padding: 15px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        #char-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #5c92c2;
+            margin-bottom: 5px;
+        }
+
+        #dialogue-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        /* 選項按鈕區域 */
+        #choices-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 500px;
+            z-index: 5;
+        }
+
+        .choice-btn {
+            background: rgba(30, 40, 50, 0.9);
+            border: 1px solid #5c92c2;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .choice-btn:hover {
+            background: #5c92c2;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- 頂部數值即時監控 -->
+        <div id="debug-panel">
+            ❤️ 愛心值: <span id="stat-love">0</span> | 
+            ⚖️ 立場值: <span id="stat-truth">0</span>
+        </div>
+
+        <!-- 角色立繪（此處用文字方塊代替，你之後可以直接換成 <img src="...">） -->
+        <div id="sprite-container">
+            <div id="sprite-yaozu" class="sprite" style="color: #c25c5c; font-weight:bold; font-size: 24px;">【耀祖 立繪】</div>
+            <div id="sprite-yimo" class="sprite" style="color: #5cc27d; font-weight:bold; font-size: 24px;">【依模 立繪】</div>
+        </div>
+
+        <!-- 選項視窗 -->
+        <div id="choices-container"></div>
+
+        <!-- 對話框 -->
+        <div id="textbox" onclick="game.next()">
+            <div id="char-name">陳可賓</div>
+            <div id="dialogue-text">點擊對話框開始遊戲...</div>
+        </div>
+    </div>
+
+<script>
+// 1. 遊戲核心變數與數值天平
+let love = 0;
+let truth = 0;
+let sceneFourC = false;
+let currentStep = 0;
+
+// 2. 劇本資料庫（State Machine）
+const script = {
+    0: { name: "陳可賓", text: "（新墟茶餐廳裡，凍檸茶的冰塊已經融化了一半。桌上的空氣比午後的屯門公路還要堵塞。）", bg: "#433", yaozu: false, yimo: false },
+    1: { name: "李耀祖", text: "「如果畀我知道村入面有人搞基，我唔會放過佢！簡直係丟晒圍村人塊面！」", bg: "#433", yaozu: true, yimo: false },
+    2: { name: "吳依模", text: "「呵呵，唔放過？你哋除咗面子還識得啲咩？連你都想一齊逼死我，係咪？！」", bg: "#433", yaozu: true, yimo: true },
+    3: { name: "陳可賓", text: "（耀祖一巴掌拍在桌上，震得餐具發響。夾在兩人中間，我手心全是冷汗。我該怎麼回應？）", bg: "#433", yaozu: true, yimo: true, 
+         choices: [
+             { text: "選項 A：強調傳統與聖經立場（捍衛傳統）", effect: () => { truth += 2; }, next: 4 },
+             { text: "選項 B：擋在依模身前，反駁耀祖（支持依模）", effect: () => { love += 2; truth -= 2; }, next: 4 }
+         ] 
+    },
+    
+    // 進入場景五：操場對質（直接跳轉到大結局測試門檻）
+    4: { name: "陳可賓", text: "（時光飛逝，轉眼到了畢業禮前夕。耀祖與依模在學校操場中央站著，兩人的眼神都到了碎裂的邊緣。）", bg: "#234", yaozu: true, yimo: true },
+    5: { name: "吳依模", text: "「陳可賓，你今日夾硬帶我嚟……是不是想在畢業前，聯合他一起對我做最後的審判？」", bg: "#234", yaozu: true, yimo: true },
+    6: { name: "陳可賓", text: "（看著兩位好朋友，我的內心開始瘋狂搏弈。此時此刻，我該怎麼做？）", bg: "#234", yaozu: true, yimo: true,
+         checkGateway: true // 觸發後台數值鋼絲判定
+    },
+    
+    // 結局分支
+    "true_end": { name: "陳可賓", text: "「夠啦！！」我使出全身力氣猛地衝上去，一隻手按住耀祖的肩膀，另一隻手緊緊抓著依模的書包！", bg: "#653", yaozu: true, yimo: true },
+    "true_end_2": { name: "吳依模", text: "（依模防線徹底碎裂，丟下書包跪在沙地上）「對唔住……我好驚你哋唔要我啊……」", bg: "#653", yaozu: true, yimo: true },
+    "true_end_3": { name: "系統", text: "【🎉 解鎖 TRUE END：榕樹下的新合照】你成功走過了愛心與立場的鋼絲。雲層散開，黃金色的夕陽落滿了整個操場。遊戲結束。", bg: "#653", yaozu: false, yimo: false, end: true },
+    
+    "bad_end_c": { name: "系統", text: "【🚨 達成結局 C：虛偽橋樑的崩塌】可賓因為前期的逃避或數值不足，底氣心虛。依模與耀祖最終徹底決裂，老死不相往來。遊戲結束。", bg: "#111", yaozu: false, yimo: false, end: true }
+};
+
+// 3. 遊戲引擎邏輯
+const game = {
+    updateUI: function() {
+        const node = script[currentStep];
+        if (!node) return;
+
+        // 更新變數面板
+        document.getElementById("stat-love").innerText = love;
+        document.getElementById("stat-truth").innerText = truth;
+
+        // 更新文本與名字
+        document.getElementById("char-name").innerText = node.name;
+        document.getElementById("dialogue-text").innerText = node.text;
+        
+        // 更新背景色（隱喻 CG 背景切換）
+        document.getElementById("game-container").style.backgroundColor = node.bg;
+
+        // 控制立繪顯示/隱藏
+        document.getElementById("sprite-yaozu").classList.toggle("active", !!node.yaozu);
+        document.getElementById("sprite-yimo").classList.toggle("active", !!node.yimo);
+
+        // 渲染選項
+        const choicesContainer = document.getElementById("choices-container");
+        choicesContainer.innerHTML = "";
+        
+        if (node.choices) {
+            document.getElementById("textbox").style.pointerEvents = "none"; // 鎖定對話框點擊
+            node.choices.forEach(c => {
+                const btn = document.createElement("div");
+                btn.className = "choice-btn";
+                btn.innerText = c.text;
+                btn.onclick = () => {
+                    c.effect();
+                    document.getElementById("textbox").style.pointerEvents = "auto";
+                    currentStep = c.next;
+                    this.updateUI();
+                };
+                choicesContainer.appendChild(btn);
+            });
+        }
+        
+        // 如果有後台門檻判定
+        if (node.checkGateway) {
+            document.getElementById("choices-container").innerHTML = "";
+            // True End 門檻：愛心 >= 4, 立場 >= 3, 且沒走過 4C (這裡因為演示，我們把門檻稍微放寬，或者直接看玩家在步驟 3 選了什麼)
+            // 完美走法：玩家在步驟3選了什麼，就會對應加分。為了測試，如果 love == 2 (選了支持依模) 我們假設他沒達標立場；如果選了A則立場達標但愛心不夠。
+            // 這裡直接模擬判定：
+            if (sceneFourC === false && love >= 2 && truth >= 2) { 
+                // 這裡數值僅作網頁邏輯演示，只要兩值平衡，就解鎖完美吶喊選項
+                const btn = document.createElement("div");
+                btn.className = "choice-btn";
+                btn.innerText = "🌟 猛地衝上去按住兩人，釋放靈魂吶喊！";
+                btn.onclick = () => { currentStep = "true_end"; this.updateUI(); };
+                choicesContainer.appendChild(btn);
+            } else {
+                // 不達標，直接顯示唯一選項逼近壞結局
+                const btn = document.createElement("div");
+                btn.className = "choice-btn";
+                btn.innerText = "（心虛低頭）我不知道該說什麼……";
+                btn.onclick = () => { currentStep = "bad_end_c"; this.updateUI(); };
+                choicesContainer.appendChild(btn);
+            }
+        }
+    },
+    
+    next: function() {
+        const node = script[currentStep];
+        if (node.choices || node.checkGateway) return; // 有選項或判定時，不能靠點擊對話框跳過
+        if (node.end) {
+            alert("遊戲已結束，網頁將重新載入。");
+            location.reload();
+            return;
+        }
+        
+        // 進程推進
+        if (currentStep === 4) currentStep = 5;
+        else if (currentStep === 5) currentStep = 6;
+        else if (currentStep === "true_end") currentStep = "true_end_2";
+        else if (currentStep === "true_end_2") currentStep = "true_end_3";
+        else {
+            currentStep++;
+        }
+        this.updateUI();
+    }
+};
+
+// 啟動遊戲
+game.updateUI();
+</script>
+
+</body>
+</html>
