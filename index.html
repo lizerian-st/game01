@@ -65,14 +65,14 @@ let step = 0;
 // 素材網址定義（建議之後更換為本地或你自己的遊戲素材路徑）
 const assets = {
     bg: {
-        banyan: "images/bg0.png", // 榕樹頭
-        cafe: "images/bg1.png",   // 茶餐廳
-        stairs: "images/bg2.png", // 後樓梯
-        crossroad: "images/bg3.png",// 輕鐵站/操場
-        rooftop: "images/bg4a.png",  // 天台
-        park: "images/bg4b.png",      // 公園
-        room: "images/bg4c.png",      // 房間
-        playground: "images/bg5.png"// 最終操場
+        banyan: "images/bg0.png?auto=format&fit=crop&w=1024&q=80", // 榕樹頭
+        cafe: "images/bg1.png?auto=format&fit=crop&w=1024&q=80",   // 茶餐廳
+        stairs: "images/bg2.png?auto=format&fit=crop&w=1024&q=80", // 後樓梯
+        crossroad: "images/bg3.png?auto=format&fit=crop&w=1024&q=80",// 輕鐵站/操場
+        rooftop: "images/bg4a.png?auto=format&fit=crop&w=1024&q=80",  // 天台
+        park: "images/bg4b.png?auto=format&fit=crop&w=1024&q=80",      // 公園
+        room: "images/bg4c.png?auto=format&fit=crop&w=1024&q=80",      // 房間
+        playground: "images/bg5.png?auto=format&fit=crop&w=1024&q=80"// 最終操場
     }
 };
 
@@ -101,7 +101,7 @@ const story = [
     { name: "耀祖", text: "「我頂……可賓你睇下！依模居然……佢真係『基』嘅？！虧我平時當佢妹咁錫，佢竟然瞞住我哋搞呢啲嘢？！簡直係不知羞恥！」", bg: assets.bg.stairs, chara: "yau" },
     { name: "系統提示", text: "（耀祖憤怒地打落牆壁，發出巨大的撞擊聲。依模嚇了一跳，臉色一瞬間變得慘白。）", stage: "耀祖推開防煙門", bg: assets.bg.stairs, chara: "both" },
     { name: "依模", text: "「係啊！你哋睇到啦？滿意未？李耀祖，你係咪覺得好噁心？想開祠堂打斷我隻腳啊？嚟啊！我話畀你聽，我由中一開始就鍾意女仔！我平時同你哋食飯，見到你開口埋口講生仔、講傳統，我都覺得好反胃啊！」", bg: assets.bg.stairs, chara: "yee" },
-    { nme: "耀祖", text: "「你……你不可理喻！我地屋企人咁熟，我當你係親妹先至咁緊張！你依家做出呢啲野，如果被學校同級班人知，班男仔會點笑你？班女仔實當你怪物咁排擠你！可賓，你睇下佢！」", bg: assets.bg.stairs, chara: "yau" },
+    { name: "耀祖", text: "「你……你不可理喻！我地屋企人咁熟，我當你係親妹先至咁緊張！你依家做出呢啲野，如果被學校同級班人知，班男仔會點笑你？班女仔實當你怪物咁排擠你！可賓，你睇下佢！」", bg: assets.bg.stairs, chara: "yau" },
     { name: "陳可賓（內心獨白）", text: "依模像一隻受傷的刺蝟。而耀祖的憤怒裡，全是對依模面臨處境的恐懼。身為基督徒，我該怎麼做？", bg: assets.bg.stairs, chara: "both",
       choices: [
         { text: "「耀祖，你收聲先！依模，你冷靜點，唔好用呢種說話刺傷大家。耀祖係因為當你係親人、怕你在學校和村裡被排擠先會咁激動。依模，你可以講清楚比我哋知嗎？」", effect: () => { love += 2; truth += 1; }, next: 16 },
@@ -155,12 +155,13 @@ const story = [
     { name: "系統提示", text: "依模背著書包站在沙地旁，耀祖則雙手插袋站在籃球架下。幾個月不對話的他們，今天被可賓用一條訊息同時約了出來。", stage: "終章：學校操場", bg: assets.bg.playground, chara: "both" },
     { name: "依模", text: "「陳可賓，你騙我出嚟。你明知我不想見到某些滿腦子封建思想的人。你今日夾硬帶我嚟，是不是想在畢業前，聯合他一起對我做最後的審判？」", bg: assets.bg.playground, chara: "yee" },
     { name: "耀祖", text: "「吳依模！你講夠未啊？！幾個月喇，你開口埋口都話人審判你！我係怕你被人當怪物欺負啊！」", bg: assets.bg.playground, chara: "yau" },
-    { name: "依模", text: "「哈哈！怪物？陳可賓，到你了！你身上掛著十字架，你今天是要站在你那本聖經和這位圍村大少爺那邊把我釘死，還是怎麼樣？講啊！」", bg: assets.bg.playground, chara: "both", check: true,
+    { name: "依模", text: "「哈哈！怪物？陳可賓，到你了！你身上掛著十字架，你今天是要站在你那本聖經和這位圍村大少爺那邊把我釘死，還是怎麼樣？講啊！」", bg: assets.bg.playground, chara: "both",
 	choices: [
-        { text: "「依模，聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」", check: true },
-        { text: "「耀祖，你太過分了。如果你的交代和傳統是要建立在抹殺依模真正的自我、逼她痛苦一輩子的基礎上，我寧願不要這種傳統！依模，我支持你，你沒有錯，做你自己！」", check: true },
-        { text: "你兩個都給我聽清楚！十年的感情，難道真的比不上一條性取向？！」", check: true }
+        { text: "「依模，聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」", next: 37 },
+        { text: "「耀祖，你太過分了。如果你的交代和傳統是要建立在抹殺依模真正的自我、逼她痛苦一輩子的基礎上，我寧願不要這種傳統！依模，我支持你，你沒有錯，做你自己！」", next: 37 },
+        { text: "你兩個都給我聽清楚！十年的感情，難道真的比不上一條性取向？！」", next: 37 }
       ]},
+	{ name: "系統提示", text: "（命運的終極抉擇。你的每一個字，都將決定三個人的一生。）", bg: assets.bg.playground, chara: "both", check: true }
 ];
 
 function nextStep() {
