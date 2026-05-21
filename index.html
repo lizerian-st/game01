@@ -65,14 +65,14 @@ let step = 0;
 // 素材網址定義（建議之後更換為本地或你自己的遊戲素材路徑）
 const assets = {
     bg: {
-        banyan: "images/bg0,png", // 榕樹頭
-        cafe: "images/bg1,png",   // 茶餐廳
-        stairs: "images/bg2,png", // 後樓梯
-        crossroad: "images/bg3,png",// 輕鐵站/操場
-        rooftop: "images/bg4a,png",  // 天台
-        park: "images/bg4b,png",      // 公園
-        room: "images/bg4c,png",      // 房間
-        playground: "images/bg5,png"// 最終操場
+        banyan: "images/bg0.png", // 榕樹頭
+        cafe: "images/bg1.png",   // 茶餐廳
+        stairs: "images/bg2.png", // 後樓梯
+        crossroad: "images/bg3.png",// 輕鐵站/操場
+        rooftop: "images/bg4a.png",  // 天台
+        park: "images/bg4b.png",      // 公園
+        room: "images/bg4c.png",      // 房間
+        playground: "images/bg5.png"// 最終操場
     }
 };
 
@@ -157,9 +157,9 @@ const story = [
     { name: "耀祖", text: "「吳依模！你講夠未啊？！幾個月喇，你開口埋口都話人審判你！我係怕你被人當怪物欺負啊！」", bg: assets.bg.playground, chara: "yau" },
     { name: "依模", text: "「哈哈！怪物？陳可賓，到你了！你身上掛著十字架，你今天是要站在你那本聖經和這位圍村大少爺那邊把我釘死，還是怎麼樣？講啊！」", bg: assets.bg.playground, chara: "both", check: true,
 	choices: [
-        { text: "「依模，聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」", effect: () => { truth += 0; }, next: 33 },
-        { text: "「耀祖，你太過分了。如果你的交代和傳統是要建立在抹殺依模真正的自我、逼她痛苦一輩子的基礎上，我寧願不要這種傳統！依模，我支持你，你沒有錯，做你自己！」", effect: () => { truth -= 0; love -= 0; }, next: 33 },
-        { text: "你兩個都給我聽清楚！十年的感情，難道真的比不上一條性取向？！」", effect: () => { love += 0; truth += 0; }, next: 33 }
+        { text: "「依模，聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」", check: true },
+        { text: "「耀祖，你太過分了。如果你的交代和傳統是要建立在抹殺依模真正的自我、逼她痛苦一輩子的基礎上，我寧願不要這種傳統！依模，我支持你，你沒有錯，做你自己！」", check: true },
+        { text: "你兩個都給我聽清楚！十年的感情，難道真的比不上一條性取向？！」", check: true }
       ]},
 ];
 
