@@ -220,10 +220,22 @@ function update() {
         });
     } else if (node.check) {
         if (escaped) {
-            let b = document.createElement("div");
-            b.className = "btn"; b.innerText = "由於曾選擇逃避，進入最終反噬...";
-            b.onclick = () => { triggerEscapedBadEnd(); };
-            document.getElementById("choices").appendChild(b);
+            
+			let c1 = document.createElement("div");
+            c1.className = "btn"; c1.innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」";
+            c1.onclick = () => { triggerEscapedBadEnd(); };
+            
+            let c2 = document.createElement("div");
+            c2.className = "btn"; c2.innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」";
+            c2.onclick = () => { triggerEscapedBadEnd(); };
+
+            let c3 = document.createElement("div");
+            c3.className = "btn"; c3.innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！十年的感情，連一個真正坐低傾的機會都無嗎？！」";
+            c3.onclick = () => { triggerEscapedBadEnd(); };
+
+            document.getElementById("choices").appendChild(c1);
+            document.getElementById("choices").appendChild(c2);
+            document.getElementById("choices").appendChild(c3);
         } else {
             let c1 = document.createElement("div");
             c1.className = "btn"; c1.innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」";
