@@ -226,7 +226,7 @@ function update() {
             document.getElementById("choices").appendChild(b);
         } else {
             let c1 = document.createElement("div");
-            c1.className = "btn"; c1.innerText = "選擇 1：「依模，對唔住。雖然這很殘忍，但我認同耀祖。」";
+            c1.className = "btn"; c1.innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」";
             c1.onclick = () => { showEndingA(); };
             
             let c2 = document.createElement("div");
@@ -250,24 +250,24 @@ function triggerEscapedBadEnd() {
     document.getElementById("chara-yee").classList.add("active");
     
     document.getElementById("char-name").innerText = "依模 & 耀祖";
-    document.getElementById("dialogue").innerText = "依模冷笑一聲：「陳可賓，你嗰晚選擇逃避一走了之、唔理我哋……你根本無當過我哋係朋友！你嘅關心真係虛偽。」耀祖也怒視著你：「無錯，兄弟最需要你嘅時候你轉身回家。算啦陳可賓，你呢種懦夫唔配做我兄弟！」";
+    document.getElementById("dialogue").innerText = "依模冷笑一聲：「陳可賓，你嗰晚選擇逃避一走了之、唔理我哋……你根本無當過我哋係朋友！你嘅關心真係虛偽。」\n耀祖也怒視著你：「無錯，兄弟最需要你嘅時候你轉身回家。算啦陳可賓，你呢種懦夫唔配做我兄弟！」";
     document.getElementById("stage-desc").innerText = "結局A：虛偽與逃避的代價";
     showRestartButton();
 }
 
 function showEndingA() {
     setCharaDisplay("none");
-    document.getElementById("char-name").innerText = "陳可賓";
-    document.getElementById("dialogue").innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」\n\n【依模絕望地笑】：「好，連你都用聖經來判定我是個錯誤。多謝你哋，徹底砸碎了我對這個世界最後的留戀。」";
-    document.getElementById("stage-desc").innerText = "畢業禮那天，依模沒有出席。不久後，她和父母低調地搬離了屯門圍村，徹底斷絕了聯絡。可賓畢業後成為了教會最堅定捍衛教義的青年領袖，耀祖則留在村裡繼承傳統。每當崇拜結束，可賓看著空蕩蕩的長凳，心裡總有一塊地方，永遠地死去了。\n\nEnding B：律法審判後的孤寂";
+    document.getElementById("char-name").innerText = "依模";
+    document.getElementById("dialogue").innerText = "「好，連你都用聖經來判定我。多謝哂你哋，徹底粉碎了我對這個世界最後的留戀。」畢業禮那天，依模沒有出席。不久後，她和父母低調地搬離了屯門圍村，徹底斷絕了聯絡。每當可賓返完教會後，經過三人兒時一起遊玩的公園，心裡總有一塊地方，永遠地死去了。";
+    document.getElementById("stage-desc").innerText = "結局B：律法審判後的孤寂";
     showRestartButton();
 }
 
 function showEndingB() {
     setCharaDisplay("none");
     document.getElementById("char-name").innerText = "陳可賓";
-    document.getElementById("dialogue").innerText = "「耀祖，你太過分了。如果你的交代和傳統是要建立在抹殺依模真正的自我、逼她痛苦一輩子的基礎上，我寧願不要這種傳統！依模，我支持你，你沒有錯，做你自己！」\n\n【耀祖眼神充滿背叛感】：「陳可賓……我當你是兄弟，你竟然話我逼死佢？好！由今日開始，我無你哋呢兩個兄弟！」(轉身跑出校門)";
-    document.getElementById("stage-desc").innerText = "那一天後，耀祖與兩人決裂。畢業後，可賓對教會的僵硬感到失望，最終離開了教會、放棄了信仰。他搬到了市區，和依模合租了一個小單位。依模雖然得到了自由，但每當深夜，她看著可賓為了支持她而失去的信仰與兄弟情，她內心的罪惡感和不安全感依然讓她徹夜難眠。\n\nEnding C：失去靈魂的自由";
+    document.getElementById("dialogue").innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」\n【耀祖】：「陳可賓……我當你是兄弟，你竟然話我逼死佢？好！由今日開始，我無你哋呢兩個兄弟！」(轉身跑出校門)\n那一天後，耀祖與兩人決裂。畢業後，可賓不能接受聖經立場，最終離開了教會、放棄了信仰。依模雖然得到了自由，但她想到好友因她反目，甚至離開信仰，她內心的罪惡感和不安全感依然讓她徹夜難眠。";
+    document.getElementById("stage-desc").innerText = "結局C：失去靈魂的自由";
     showRestartButton();
 }
 
@@ -283,8 +283,8 @@ function checkValuesForEndingCOrTrue() {
 function showEndingC() {
     setCharaDisplay("both");
     document.getElementById("char-name").innerText = "依模 & 耀祖";
-    document.getElementById("dialogue").innerText = "依模：「愛人如己？陳可賓，你一邊拿著聖經說同性戀是罪，一邊又在這裡扮好人。你這種和稀泥的態度，比耀祖的粗暴更虛偽、更噁心！」\n\n耀祖：「無錯，可賓。你只是想做個兩邊討好的好人，你根本不明白我背負的家族壓力有多大！」";
-    document.getElementById("stage-desc").innerText = "Ending D：虛偽橋樑的崩塌";
+    document.getElementById("dialogue").innerText = "依模：「愛人如己？陳可賓，你一邊拿著聖經說同性戀是罪，一邊又在這裡扮好人。你這種牆頭草的態度，比耀祖的粗暴更虛偽、更噁心！」\n耀祖：「無錯，可賓。你只是想做個兩邊討好人，你根本不明白我背負的家族壓力有多大！」";
+    document.getElementById("stage-desc").innerText = "結局D：虛偽橋樑的崩塌";
     showRestartButton();
 }
 
@@ -295,8 +295,8 @@ function showTrueEnding() {
     document.getElementById("game-bg").style.backgroundImage = `url('${assets.bg.banyan}')`; // 命運交織回老榕樹
     
     document.getElementById("char-name").innerText = "陳可賓 (終極吶喊)";
-    document.getElementById("dialogue").innerText = "「耀祖！你明明是因為太害怕依模被村裡的人用流言蜚語害死……你為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很嚴厲，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！耀祖沒有嫌棄你丟臉，他是太愛你這個妹妹、太想保護你才急成那樣！十年的感情，難道真的不值得你放下身上的刺，給耀祖一個真正坐低傾的機會嗎？！」\n\n耀祖聽完痛哭失聲：「阿模……我真係好驚你被人當怪物欺負啊……」依模身上的刺也徹底崩潰，緊抱耀祖大哭：「對唔住……耀祖……我好驚你哋唔要我啊……」";
-    document.getElementById("stage-desc").innerText = "Ending E：榕樹下的新合照";
+    document.getElementById("dialogue").innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！耀祖沒有嫌棄你丟臉，他是太愛你這個妹妹、太想保護你才急成那樣！十年的感情，連一個真正坐低傾的機會都無嗎？！」\n耀祖聽完痛哭失聲：「阿模……我真係好驚你被人當怪物欺負啊……」依模也徹底崩潰大哭：「對唔住……耀祖……我好驚你哋唔要我啊……」";
+    document.getElementById("stage-desc").innerText = "結局E：立場與愛心";
     showRestartButton();
 }
 
