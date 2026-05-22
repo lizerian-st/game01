@@ -230,11 +230,11 @@ function update() {
             c1.onclick = () => { showEndingA(); };
             
             let c2 = document.createElement("div");
-            c2.className = "btn"; c2.innerText = "選擇 2：「耀祖，你太過分了。我選擇全面支持依模。」";
+            c2.className = "btn"; c2.innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」";
             c2.onclick = () => { showEndingB(); };
 
             let c3 = document.createElement("div");
-            c3.className = "btn"; c3.innerText = "選擇 3：「猛地衝上去按住兩人！十年的感情，難道真的比不上一條性取向？！」";
+            c3.className = "btn"; c3.innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！十年的感情，連一個真正坐低傾的機會都無嗎？！」";
             c3.onclick = () => { checkValuesForEndingCOrTrue(); };
 
             document.getElementById("choices").appendChild(c1);
@@ -265,8 +265,8 @@ function showEndingA() {
 
 function showEndingB() {
     setCharaDisplay("none");
-    document.getElementById("char-name").innerText = "陳可賓";
-    document.getElementById("dialogue").innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」\n【耀祖】：「陳可賓……我當你是兄弟，你竟然話我逼死佢？好！由今日開始，我無你哋呢兩個兄弟！」(轉身跑出校門)\n那一天後，耀祖與兩人決裂。畢業後，可賓不能接受聖經立場，最終離開了教會、放棄了信仰。依模雖然得到了自由，但她想到好友因她反目，甚至離開信仰，她內心的罪惡感和不安全感依然讓她徹夜難眠。";
+    document.getElementById("char-name").innerText = "耀祖";
+    document.getElementById("dialogue").innerText = "「陳可賓……我當你是兄弟，你竟然話我逼死佢？好！由今日開始，我無你哋呢兩個兄弟！」(轉身跑出校門)\n那一天後，耀祖與兩人決裂。畢業後，可賓不能接受聖經立場，最終離開了教會、放棄了信仰。依模雖然得到了自由，但她想到好友因她反目，甚至離開信仰，她內心的罪惡感和不安全感依然讓她徹夜難眠。";
     document.getElementById("stage-desc").innerText = "結局C：失去靈魂的自由";
     showRestartButton();
 }
@@ -294,8 +294,8 @@ function showTrueEnding() {
     document.getElementById("chara-yee").classList.add("active");
     document.getElementById("game-bg").style.backgroundImage = `url('${assets.bg.banyan}')`; // 命運交織回老榕樹
     
-    document.getElementById("char-name").innerText = "陳可賓 (終極吶喊)";
-    document.getElementById("dialogue").innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！耀祖沒有嫌棄你丟臉，他是太愛你這個妹妹、太想保護你才急成那樣！十年的感情，連一個真正坐低傾的機會都無嗎？！」\n耀祖聽完痛哭失聲：「阿模……我真係好驚你被人當怪物欺負啊……」依模也徹底崩潰大哭：「對唔住……耀祖……我好驚你哋唔要我啊……」";
+    document.getElementById("char-name").innerText = "依模 & 耀祖";
+    document.getElementById("dialogue").innerText = "耀祖痛哭失聲：「阿模……我真係好驚你被人當怪物欺負啊……」依模也徹底崩潰大哭：「對唔住……耀祖……我好驚你哋唔要我啊……」";
     document.getElementById("stage-desc").innerText = "結局E：立場與愛心";
     showRestartButton();
 }
@@ -304,7 +304,7 @@ function showRestartButton() {
     document.getElementById("choices").innerHTML = "";
     let b = document.createElement("div");
     b.className = "btn";
-    b.innerText = "重新開始遊戲 (數值已歸零重置)";
+    b.innerText = "重新開始遊戲";
     b.style.borderColor = "#ff4a4a";
     b.onclick = () => { 
         love = 0; truth = 0; escaped = false; step = 0; 
