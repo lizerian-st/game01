@@ -4,33 +4,56 @@
     <meta charset="UTF-8">
     <title>屯門信仰之絆</title>
     <style>
-        body { margin: 0; background: #0a0a0a; color: #f0f0f0; font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+body { 
+            margin: 0; 
+            background: #0a0a0a; 
+            color: #f0f0f0; 
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden; 
+            /* 阻止手機瀏覽器預設的雙擊縮放與下拉重整行為 */
+            touch-action: none; 
+        }
         
-        /* 遊戲主要容器 */
-        #game-container { width: 1024px; height: 576px; position: relative; background: #1a1a1a; border: 3px solid #333; box-shadow: 0 0 20px rgba(0,0,0,0.8); overflow: hidden; }
+        /* 🎮 遊戲主要容器：加入了自動等比例縮放的黑科技 */
+        #game-container { 
+            width: 1024px; 
+            height: 576px; 
+            position: relative; 
+            background: #1a1a1a; 
+            border: 3px solid #333; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.8); 
+            overflow: hidden; 
+            flex-shrink: 0;
+            
+            /* 核心：根據螢幕寬高，自動計算並縮放 1024x576 的畫面 */
+            transform: scale(var(--game-scale, 1));
+            transform-origin: center center;
+        }
         
-        /* 動態背景層 */
+        /* 🌅 動態背景層 */
         #game-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; z-index: 1; }
         
-        /* 昏暗氛圍遮罩層 */
+        /* 👤 昏暗氛圍遮罩層 */
         #bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.85) 100%); pointer-events: none; z-index: 2; }
         
         /* 🎭 半身立繪容器層 */
         #chara-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 3; pointer-events: none; display: flex; justify-content: space-around; align-items: flex-end; padding-bottom: 120px; box-sizing: border-box; }
         .chara-img { height: 380px; width: auto; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; filter: brightness(0.6); }
-        /* 當前說話的角色會亮起並稍微放大 */
         .chara-img.active { opacity: 1; transform: translateY(0) scale(1.05); filter: brightness(1); }
-        /* 沒說話但仍在場的角色維持半透明暗色 */
         .chara-img.visible { opacity: 0.5; transform: translateY(0); }
 
-        /* 文字框與對話系統 */
-        #textbox { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 940px; height: 160px; background: rgba(10, 15, 25, 0.92); border: 2px solid #4a5a7a; padding: 25px; box-sizing: border-box; cursor: pointer; border-radius: 8px; z-index: 10; }
+        /* 💬 文字框與對話系統 */
+        #textbox { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 940px; height: 160px; background: rgba(10, 15, 25, 0.75); border: 2px solid #4a5a7a; padding: 25px; box-sizing: border-box; cursor: pointer; border-radius: 8px; z-index: 10; }
         #char-name { font-size: 22px; color: #5cb8ff; margin-bottom: 12px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
         #dialogue { font-size: 18px; line-height: 1.6; color: #e0e0e0; }
         
-        /* 選項系統 */
-        #choices { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 15px; width: 650px; z-index: 20; }
-        .btn { background: rgba(25, 35, 50, 0.95); color: #fff; padding: 15px 25px; border: 2px solid #5cb8ff; cursor: pointer; text-align: center; border-radius: 6px; font-size: 16px; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        /* 🎛️ 選項系統 */
+        #choices { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 12px; width: 750px; z-index: 20; }
+        .btn { background: rgba(25, 35, 50, 0.95); color: #fff; padding: 12px 20px; border: 2px solid #5cb8ff; cursor: pointer; text-align: center; border-radius: 6px; font-size: 16px; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn:hover { background: #5cb8ff; color: #0a0a0a; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(92,184,255,0.4); }
         
         #stage-desc { position: absolute; top: 20px; left: 20px; font-size: 14px; color: #a9dfbf; font-style: italic; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; pointer-events: none; z-index: 5; }
@@ -79,7 +102,7 @@ const assets = {
 const story = [
     // 🌅 序章：童年的榕樹頭
     { name: "背景音", text: "（蟬鳴聲、輕鐵駛過的聲音。）", stage: "序章：童年的榕樹頭", bg: assets.bg.banyan, chara: "none" },
-    { name: "陳可賓（內心獨白）", text: "「我、耀祖、依模，喺屯門同一間幼稚園長大。耀祖同依模都係同一個圍村出世長大嘅原居民，兩家人抬頭不見低頭見；而我係村外人，因為阿媽同佢哋長輩相熟，我哋三個由細玩到大。」", bg: assets.bg.banyan, chara: "none" },
+    { name: "陳可賓（內心獨白）", text: "「我、耀祖、依模，喺屯門同一間幼稚園長大。耀祖同依模都係同一個圍村出世長大嘅原居民，兩家人抬頭不見低頭見；而我係村外人，因為阿媽同佢哋長輩相熟，我哋三個由細玩到大。」/n(點擊對話框前進)", bg: assets.bg.banyan, chara: "none" },
     { name: "陳可賓（內心獨白）", text: "「耀祖個人最講義氣，小時候有人笑依模，佢第一個衝出去同人打架。我本來以為，我哋嘅長大會好似張相咁，雖然我地性格唔同，但永遠都會搭住膊頭行落去。直到中五嗰年，而依模……也有了她的秘密。一切，開始變晒。」", bg: assets.bg.banyan, chara: "none" },
     
     // 🎬 場景一：新墟的茶餐廳
@@ -324,8 +347,34 @@ function showRestartButton() {
     };
     document.getElementById("choices").appendChild(b);
 }
+	
+// 📱 自動等比例縮放黑科技
+function resizeGame() {
+    const gameContainer = document.getElementById("game-container");
+    const baseWidth = 1024;
+    const baseHeight = 576;
+    
+    // 獲取目前手機瀏覽器可用的寬高
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // 計算寬度和高度的縮放比例，取其小者以防超出螢幕
+    const scaleX = windowWidth / baseWidth;
+    const scaleY = windowHeight / baseHeight;
+    const scale = Math.min(scaleX, scaleY, 1); // 最高限制 1 倍，防止在超大螢幕上模糊
+    
+    // 將計算好的比例塞進 CSS 變數中
+    document.documentElement.style.setProperty('--game-scale', scale);
+}
 
-// 啟動遊戲
+// 監聽螢幕大小變更及旋轉事件
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', resizeGame);
+
+// 立即執行一次
+resizeGame();
+
+// 啟動遊戲 (原本你代碼最後一行的 update)
 update();
 </script>
 </body>
