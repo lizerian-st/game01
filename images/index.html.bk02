@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>信仰之絆</title>
+    <style>
+body { 
+            margin: 0; 
+            background: #0a0a0a; 
+            color: #f0f0f0; 
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden; 
+            /* 阻止手機瀏覽器預設的雙擊縮放與下拉重整行為 */
+            touch-action: none; 
+        }
+        
+        /* 🎮 遊戲主要容器：加入了自動等比例縮放的黑科技 */
+        #game-container { 
+            width: 1024px; 
+            height: 576px; 
+            position: relative; 
+            background: #1a1a1a; 
+            border: 3px solid #333; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.8); 
+            overflow: hidden; 
+            flex-shrink: 0;
+            
+            /* 核心：根據螢幕寬高，自動計算並縮放 1024x576 的畫面 */
+            transform: scale(var(--game-scale, 1));
+            transform-origin: center center;
+        }
+      
+        /* 🎨 遊戲封面頁樣式 */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 建議生成 AI 封面圖後，將下行換成你的封面圖路徑 */
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('images/op01.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 100; /* 確保擋在最上層 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        #game-title {
+            font-size: 80px;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(92,184,255,0.6);
+        }
+        
+        #game-subtitle {
+            font-size: 30px;
+            color: #f1c40f;
+            margin-bottom: 40px;
+            font-style: italic;
+            max-width: 800px;
+            text-align: center;
+            line-height: 1.6;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+        }
+        
+        #start-btn {
+            width: 200px;
+            font-size: 18px;
+            letter-spacing: 2px;
+            padding: 15px;
+        }
+	  
+        /* 🌅 動態背景層 */
+        #game-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: background-image 0.8s ease-in-out; z-index: 1; }
+        
+        /* 👤 昏暗氛圍遮罩層 */
+        #bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.85) 100%); pointer-events: none; z-index: 2; }
+        
+        /* 🎭 半身立繪容器層 */
+        #chara-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 3; pointer-events: none; display: flex; justify-content: space-around; align-items: flex-end; padding-bottom: 120px; box-sizing: border-box; }
+        .chara-img { height: 380px; width: auto; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; filter: brightness(0.6); }
+        .chara-img.active { opacity: 1; transform: translateY(0) scale(1.05); filter: brightness(1); }
+        .chara-img.visible { opacity: 0.5; transform: translateY(0); }
+
+        /* 💬 文字框與對話系統 */
+        #textbox { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 940px; height: 160px; background: rgba(10, 15, 25, 0.75); border: 2px solid #4a5a7a; padding: 25px; box-sizing: border-box; cursor: pointer; border-radius: 8px; z-index: 10; }
+        #char-name { font-size: 22px; color: #5cb8ff; margin-bottom: 12px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        #dialogue { font-size: 18px; line-height: 1.6; color: #e0e0e0; }
+        
+        /* 🎛️ 選項系統 */
+        #choices { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 12px; width: 750px; z-index: 20; }
+        .btn { background: rgba(25, 35, 50, 0.95); color: #fff; padding: 12px 20px; border: 2px solid #5cb8ff; cursor: pointer; text-align: center; border-radius: 6px; font-size: 16px; font-weight: bold; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn:hover { background: #5cb8ff; color: #0a0a0a; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(92,184,255,0.4); }
+        
+        #stage-desc { position: absolute; top: 20px; left: 20px; font-size: 14px; color: #a9dfbf; font-style: italic; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; pointer-events: none; z-index: 5; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <h1 id="game-title">信仰之絆</h1>
+        <p id="game-subtitle">「當傳統、聖經、自由互相抵觸，你選擇哪一個？」</p>
+        <div id="start-btn" class="btn">▶ 開始遊戲</div>
+    </div>
+
+
+    <div id="game-bg"></div>
+    <div id="bg-overlay"></div>
+    
+    <!-- 🎭 立繪顯示區域（左耀祖，右依模） -->
+    <div id="chara-layer">
+        <img id="chara-yau" class="chara-img" src="images/boy.png?auto=format&fit=crop&w=300&q=80" alt="耀祖立繪佔位">
+        <img id="chara-yee" class="chara-img" src="images/girl.png?auto=format&fit=crop&w=300&q=80" alt="依模立繪佔位">
+    </div>
+
+    <div id="stage-desc"></div>
+    <div id="choices"></div>
+    <div id="textbox" onclick="nextStep()">
+        <div id="char-name"></div>
+        <div id="dialogue"></div>
+    </div>
+</div>
+
+<script>
+let love = 0;
+let truth = 0;
+let escaped = false;
+let step = 0;
+
+// 素材網址定義（建議之後更換為本地或你自己的遊戲素材路徑）
+const assets = {
+    bg: {
+        banyan: "images/bg0.png?auto=format&fit=crop&w=1024&q=80", // 榕樹頭
+        cafe: "images/bg1.png?auto=format&fit=crop&w=1024&q=80",   // 茶餐廳
+        stairs: "images/bg2.png?auto=format&fit=crop&w=1024&q=80", // 後樓梯
+        crossroad: "images/bg3.png?auto=format&fit=crop&w=1024&q=80",// 輕鐵站/操場
+        rooftop: "images/bg4a.png?auto=format&fit=crop&w=1024&q=80",  // 天台
+        park: "images/bg4b.png?auto=format&fit=crop&w=1024&q=80",      // 公園
+        room: "images/bg4c.png?auto=format&fit=crop&w=1024&q=80",      // 房間
+        playground: "images/bg5.png?auto=format&fit=crop&w=1024&q=80"// 最終操場
+    }
+};
+
+const story = [
+    // 🌅 序章：童年的榕樹頭
+    { name: "背景音", text: "（蟬鳴聲、輕鐵駛過的聲音。）", stage: "序章：童年的榕樹頭", bg: assets.bg.banyan, chara: "none" },
+    { name: "陳可賓（內心獨白）", text: "「我、耀祖、依模，喺屯門同一間幼稚園長大。耀祖同依模都係同一個圍村出世長大嘅原居民，兩家人抬頭不見低頭見；而我係村外人，因為阿媽同佢哋長輩相熟，我哋三個由細玩到大。」/n(點擊對話框前進)", bg: assets.bg.banyan, chara: "none" },
+    { name: "陳可賓（內心獨白）", text: "「耀祖個人最講義氣，小時候有人笑依模，佢第一個衝出去同人打架。我本來以為，我哋嘅長大會好似張相咁，雖然我地性格唔同，但永遠都會搭住膊頭行落去。直到中五嗰年，而依模……也有了她的秘密。一切，開始變晒。」", bg: assets.bg.banyan, chara: "none" },
+    
+    // 🎬 場景一：新墟的茶餐廳
+    { name: "系統提示", text: "（場景一：新墟的茶餐廳。下午四點。門外是新墟街市嘈雜的叫賣聲。餐廳內杯碟聲不斷，電視正播放著同性婚姻合法化的專題報導。）", stage: "新墟茶餐廳", bg: assets.bg.cafe, chara: "none" },
+    { name: "耀祖", text: "「嘖，真係頂唔順。電視班人成日走出嚟搞事，男男、女女成何體統？你地知唔知上星期隔壁村有個女仔被發現行埋呢啲嘢，佢父母喺祠堂門口被長輩講到頭都抬唔起？如果畀我知道村入面有人搞基，我唔會放過佢！」", bg: assets.bg.cafe, chara: "yau" },
+    { name: "依模", text: "「呵，唔會放過佢？條村除咗面子、繁衍後代、分丁權之外，仲識得啲咩？成個祠堂規規根本就係封建監獄。人哋鍾意邊個，憑咩要向你哋班old seafood交代？」", bg: assets.bg.cafe, chara: "yee" },
+    { name: "依模", text: "「可賓，你有返教會睇過聖經，你話班old seafood係咪好無聊？定係，你同李耀祖一樣，其實心底裡都覺得我呢種追求自由嘅人好有問題？」", bg: assets.bg.cafe, chara: "yee" },
+    { name: "耀祖", text: "「吳依模！你講咩話？！你而家嫌棄我哋圍村傳統？我係好心提醒你，費事你行錯路！你竟然話我哋old seafood？！」", bg: assets.bg.cafe, chara: "yau" },
+    { name: "依模", text: "「好心？你嗰種叫控制慾！可賓，你睇下佢，如果你今日唔幫我講說話，就證明你同佢一樣，一信咗教就冇咗人性，根本從來無當過我是朋友！連你都想一齊逼死我，係咪？！」", bg: assets.bg.cafe, chara: "yee" },
+    { name: "陳可賓（內心獨白）", text: "耀祖滿臉通紅，拳頭緊握；依模挑釁眼光，逼著我立刻表態。我該怎麼開口？", bg: assets.bg.cafe, chara: "both",
+      choices: [
+        { text: "「依模，其實耀祖雖然大聲，但他講得有道理。聖經講神創造世界，設立的就是一男一女的婚姻。傳統同教義都有它的心意。」", effect: () => { truth += 2; }, next: 10 },
+        { text: "「耀祖，你飲啖檸茶先。依模講得無錯啊，人哋鍾意邊個到底傷害到邊個？你唔好用村嗰套逼人啦。依模，我支持每個人都有愛人的自由，一男一女...嗯...都唔一定...我會企喺你呢邊。」", effect: () => { love += 2; truth -= 2; }, next: 10 },
+        { text: "「哎呀好啦好啦，兩位大爺！聽日仲功課要交，耀祖你做完未啊？一陣一齊搭輕鐵返屋企啦，唔好嘈啦。」", effect: () => { love -= 1; truth -= 1; }, next: 10 }
+      ]},
+
+    // 🎬 場景二：秘密的敗露（後樓梯危機）
+    { name: "系統提示", text: "（場景二：耀祖拉著可賓，在學校後樓梯偷看。依模正和一個打扮中性的高年級女生激烈爭吵，那女生拉著依模的手，依模哭著甩開，最後那女生吻了依模的臉頰後離去。依模靠在牆上喘氣。", stage: "學校後樓梯", bg: assets.bg.stairs, chara: "none" },
+    { name: "耀祖", text: "「我頂……可賓你睇下！依模居然……佢真係『基』嘅？！虧我平時當佢妹咁錫，佢竟然瞞住我哋搞呢啲嘢？！簡直係不知羞恥！」", bg: assets.bg.stairs, chara: "yau" },
+    { name: "系統提示", text: "（耀祖憤怒地打落牆壁，發出巨大的撞擊聲。依模嚇了一跳，臉色一瞬間變得慘白。）", stage: "耀祖推開防煙門", bg: assets.bg.stairs, chara: "both" },
+    { name: "依模", text: "「係啊！你哋睇到啦？滿意未？李耀祖，你係咪覺得好噁心？想開祠堂打斷我隻腳啊？嚟啊！我話畀你聽，我由中一開始就鍾意女仔！我平時同你哋食飯，見到你開口埋口講生仔、講傳統，我都覺得好反胃啊！」", bg: assets.bg.stairs, chara: "yee" },
+    { name: "耀祖", text: "「你……你不可理喻！我地屋企人咁熟，我當你係親妹先至咁緊張！你依家做出呢啲野，如果被學校同級班人知，班男仔會點笑你？班女仔實當你怪物咁排擠你！可賓，你睇下佢！」",  bg: assets.bg.stairs, chara: "yau" },
+    { name: "陳可賓（內心獨白）", text: "依模像一隻受傷的刺蝟。而耀祖的憤怒裡，全是對依模面臨處境的恐懼。身為基督徒，我該怎麼做？", bg: assets.bg.stairs, chara: "both",
+      choices: [
+        { text: "「耀祖，你收聲先！依模，你冷靜點，唔好用呢種說話刺傷大家。耀祖係因為當你係親人、怕你在學校和村裡被排擠先會咁激動。依模，你可以講清楚比我哋知嗎？」", effect: () => { love += 2; truth += 1; }, next: 16 },
+        { text: "「依模，你點可以咁同耀祖講野？佢雖然大聲，但出發點係關心你將來嘅處境。你瞞住我哋咁多年，仲要用這種態度同我地講野，你太令我失望了。」", effect: () => { truth += 2; }, next: 16 },
+        { text: "「你哋……你哋唔好嘈啦。依模，你先返屋企冷靜下。耀祖，我哋都走吧，一陣校工嚟鎖門㗎喇。感情嘅野我唔識啊。」", effect: () => { love -= 1; truth -= 1; }, next: 16 }
+      ]},
+
+    // 🎬 新場景三：十字路口的抉擇（大分歧點）
+    { name: "系統提示", text: "依模哭著往校門跑去，消失在黃昏的街道；耀祖則一腳踢開右邊通往天台的防煙門，重重地把門關上。現場只留下可賓一個人。）", stage: "分歧點：街道", bg: assets.bg.crossroad, chara: "none" },
+    { name: "陳可賓（內心獨白）", text: "十年的感情在這一分鐘彷彿就要碎成碎片。身為他們最好的朋友，我此時的腳步……到底應該往哪邊走？", bg: assets.bg.crossroad, chara: "none",
+      choices: [
+        { text: "「耀祖個人最衝動，但他對依模的責任感最重，我要去問清楚佢到底諗緊咩！」", effect: () => {}, next: 18 },
+        { text: "「依模表面雖然剛烈，但她內心其實最怕被我們拋棄，我唔放心佢一個人，我要追返佢！」", effect: () => {}, next: 23 },
+        { text: "「依家兩個人都喺火頭上，我夾喺中間講咩都無用，不如等大家返屋企冷靜下先……」", effect: () => { escaped = true; love -= 2; truth -= 1; }, next: 28 }
+      ]},
+
+    // 🎬 分支一：場景四 A：天台的血淚
+    { name: "系統提示", text: "學校頂樓天台。黃昏。耀祖背對著可賓，死死捏著欄杆，手指關節發白，肩膀劇烈顫抖。）", stage: "分支：天台", bg: assets.bg.rooftop, chara: "yau" },
+    { name: "可賓", text: "「耀祖！你冷靜啲先……」", bg: assets.bg.rooftop, chara: "none" },
+    { name: "耀祖", text: "「你叫我點冷靜啊？！陳可賓！吳依模同我同一個村長大，如果被村入面啲阿爺、叔伯兄弟知，佢全家實被佢地開祠堂指責、甚至將佢哋一家趕出村啊！」", bg: assets.bg.rooftop, chara: "yau" },
+    { name: "耀祖", text: "「我大聲鬧佢、叫佢正正常常搵個男仔，係因為我想喺這件事爆出嚟之前護住佢啊！佢竟然大聲話我、話我反胃……」", bg: assets.bg.rooftop, chara: "yau" },
+    { name: "陳可賓（內心獨白）", text: "原來耀祖的粗暴，是用他最笨拙的方式保護依模。面對耀祖這份沉重又扭曲的保護，我該怎麼回應？", bg: assets.bg.rooftop, chara: "yau",
+      choices: [
+        { text: "「耀祖，原來你承擔了這麼多。你是對的，依模這次真的太任性了，她只顧自己一時的自由，完全沒想過父母在村裡的處境，也沒想過學校的後果。而且都唔合乎聖經道德。我支持你，我們要拉她回頭。」", effect: () => { truth += 2; }, next: 30 },
+        { text: "「耀祖，我知你是為了她好。但你有沒有想過，你用排斥、用『噁心』這些字眼去迫她，她只會更加唔聽我地講！如果連你這個，同村一起長大的兄弟都這樣說，她才是真的在學校、在村裡孤立無援！」", effect: () => { love += 2; truth -= 0; }, next: 30 },
+        { text: "「耀祖，我看到了你有多珍惜依模。你怕她被村裡和學校的人排擠，這不是錯。但依模佢份人，你越強硬，她越反叛。不如這樣，你先不要逼她，這段時間由我這個『村外人』去關心她，我們一起想辦法保護她，好嗎？」", effect: () => { love += 2; truth += 1; }, next: 30 }
+      ]},
+
+    // 🎬 分支二：場景四 B：公園的殘酷童話
+    { name: "系統提示", text: "兒時三人經常一起玩耍的屯門圍村外舊公園，下著毛毛細雨。依模無助地坐在鞦韆上。）", stage: "分支：下雨的公園", bg: assets.bg.park, chara: "yee" },
+    { name: "依模", text: "「陳可賓，追過嚟做咩啊？呢個公園，我哋細個一齊玩沙。耀祖在後樓梯講嘅說話，同要殺死我無分別。他嫌我丟了圍村的面子！」", bg: assets.bg.park, chara: "yee" },
+    { name: "可賓", text: "「依模……耀祖他其實只是太急，他怕你在村裡和學校被大家排擠……」", bg: assets.bg.park, chara: "none" },
+    { name: "依模", text: "「你唔好再幫佢講說話！那你呢？陳可賓。我想你清清楚楚話我知，喺你嘅信仰入面，我鍾意女仔是不是罪？是不是不可饒恕？是不是要落地獄？我要聽真心話！如果你今日都同耀祖一樣，覺得我完全係錯……那就是證明你以前講的友情全部都是虛偽的！」", bg: assets.bg.park, chara: "yee" },
+    { name: "陳可賓（內心獨白）", text: "我明白她其實是怕得要死，她害怕被拋棄。所以用最內疚的說話逼我放下所有標準。夾在神的真理與這份沉重的情感勒索之間，我該怎麼開口？", bg: assets.bg.park, chara: "yee",
+      choices: [
+        { text: "「依模，你冷靜點，我從來沒想過要逼死你，你不要用這種說話來傷害我們十年的感情。但在聖經的標準裡，同性戀確實是偏離了神心意的罪。我追出來是因為我依然當你是最好的朋友，我希望陪你一起尋求神的赦免和改變。」", effect: () => { truth += 2; love -= 1; }, next: 30 },
+        { text: "「依模！你唔好咁講啦，我點會想逼死你？如果這部聖經、這個圍村的傳統要將你逼成這樣，那我覺得這些教條不要也罷！你在我心裡永遠都沒錯，你只是在做你自己。無論如何，我都一定會站在你這邊！」", effect: () => { love += 2; truth -= 2; }, next: 30 },
+        { text: "「依模，我知道，你依家講咁多難聽的話，只是因為你太害怕被我和耀祖拋棄。聖經的界線確實好嚴厲，但我信的神，從來沒有當你是垃圾，我也絕對不會拋棄你。耀祖也不是恨你，他怕你受欺凌才急成那樣……十年的感情，我一定會陪你面對。但你也必須給耀祖一個坐低傾的機會，好嗎？」", effect: () => { love += 2; truth += 1; }, next: 30 }
+      ]},
+
+    // 🎬 分支三：場景開四 C：深夜的信仰拷問
+    { name: "系統提示", text: "我選擇了回家。我以為讓他們冷靜是最好的辦法，但現在，寂靜反而像一塊大石頭壓得我喘不過氣。窗外下著大雨。書桌上放著打開的聖經，手機屏幕亮著，三人的 WhatsApp 群組一片死寂", stage: "分支：可賓的房間", bg: assets.bg.room, chara: "none" },
+    { name: "陳可賓（內心獨白）", text: "作為家裡第一代基督徒，聖經上那些白紙黑字的律法，和耀祖絕望的咆哮、依模充滿情感勒索的雙眼，在我的腦海裡瘋狂交織。一邊是上帝的真理，一邊是十年的青梅竹馬。此時，教會團契導師傳來訊息：「可賓，看你今天心神不寧，有甚麼事情需要為你代禱嗎？」看著這條訊息，我必須做出決定。", bg: assets.bg.room, chara: "none",
+      choices: [
+        { text: "（回覆導師，並下定決心）「導師，我身邊有朋友陷入了同性戀的罪裡。我知道神不喜悅。明天回學校，我會堅定我的信仰立場，和耀祖一起勸她尋求教會的輔導轉介，帶她走回正軌。」", effect: () => { truth += 2; }, next: 30 },
+        { text: "（關掉手機，合上聖經）「太複雜了。我一個中五學生能做甚麼？這星期還要考 DSE 模擬試，如果我再分心，我連大學都入不到。他們的恩怨，讓他們自己解決吧。」", effect: () => { truth -= 1; love -= 2; }, next: 30 },
+        { text: "（跪在床邊禱告）「神啊，如果我只拿著教條去審判依模，我就不是在實踐你的愛。無論如何，我都要拉著他們兩個在操場坐下來，把所有心結打開！」", effect: () => { love += 2; truth += 1; }, next: 30 }
+      ]},
+
+    // 🎬 場景五：畢業禮前的操場（大結局前面對質）
+    { name: "系統提示", text: "依模背著書包站在沙地旁，耀祖則雙手插袋站在籃球架下。幾個月不對話的他們，今天被可賓用一條訊息同時約了出來。", stage: "終章：學校操場", bg: assets.bg.playground, chara: "both" },
+    { name: "依模", text: "「陳可賓，你騙我出嚟。你明知我不想見到某些滿腦子封建思想的人。你今日夾硬帶我嚟，是不是想在畢業前，聯合他一起對我做最後的審判？」", bg: assets.bg.playground, chara: "yee" },
+    { name: "耀祖", text: "「吳依模！你講夠未啊？！幾個月喇，你開口埋口都話人審判你！我係怕你被人當怪物欺負啊！」", bg: assets.bg.playground, chara: "yau" },
+    { name: "依模", text: "「哈哈！怪物？陳可賓，到你了！你身上掛著十字架，你今天是要站在你那本聖經和這位圍村大少爺那邊把我釘死，還是怎麼樣？講啊！」", bg: assets.bg.playground, chara: "both"},
+	{ name: "系統提示", text: "（命運的終極抉擇。你的每一個字，都將決定三個人的一生。）", bg: assets.bg.playground, chara: "both", check: true }
+];
+
+
+
+const endingScripts = {
+	//A=edB=ed02
+    A: [
+        {
+            name: "",
+            text: "【結局 B：律法審判後的孤寂】你選擇了宗教律法與傳統觀念，依模絕望離去。",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },
+		{
+            name: "可賓",
+            text: "「依模，對唔住。雖然這很殘忍，但我認同耀祖。而且聖經的最高心意確實是一男一女的婚姻，同性戀是罪。」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },		
+		{
+            name: "可賓",
+            text: "「耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },	
+		{
+            name: "依模",
+            text: "好，連你都用聖經來判定我。多謝哂你哋，徹底粉碎了我對這個世界最後的留戀。」",
+            bg: "url('images/bg5.png')",
+			chara: "yee"
+        },
+		{
+            name: "",
+            text: "畢業禮那天，依模沒有出席。不久後，她和父母低調地搬離了屯門圍村，徹底斷絕了聯絡。",
+            bg: "url('images/ed02.png')",
+			chara: "none"
+        },
+        {
+            name: "",
+            text: "每當可賓返完教會後，經過三人兒時一起遊玩的公園，心裡總有一塊地方，永遠地死去了。",
+            bg: "url('images/ed02.png')",
+			chara: "none"
+        } // 🎬 故事在這裡結束，點擊後即觸發重啟按鈕
+    ],
+	//B=edC=ed03
+	B: [
+        {
+            name: "",
+            text: "【結局C：失去靈魂的自由】你選擇了拋棄宗教與傳統，與耀祖決裂。",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },
+		{
+            name: "可賓",
+            text: "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },		
+		{
+            name: "耀祖",
+            text: "「陳可賓……我當你是兄弟，你竟然話我逼死佢？好！由今日開始，我無你哋呢兩個兄弟！」(轉身跑出校門)",
+            bg: "url('images/bg5.png')",
+			chara: "yau"
+        },	
+		{
+            name: "",
+            text: "那一天後，耀祖與兩人決裂。畢業後，可賓不能接受聖經立場，最終離開了教會、放棄了信仰。",
+            bg: "url('images/ed03.png')",
+			chara: "none"
+        },
+		{
+            name: "",
+            text: "依模雖然得到了自由，但她想到好友因她反目，甚至離開信仰，她內心的罪惡感和不安全感依然讓她徹夜難眠。",
+            bg: "url('images/ed03.png')",
+			chara: "none"
+        }
+        
+    ],
+	//C=edD=ed04
+	C: [
+        {
+            name: "",
+            text: "【結局D：虛偽橋樑的崩塌】因為試圖兩邊討好，立場經常改變...",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },
+		{
+            name: "依模",
+            text: "「愛人如己？陳可賓，你一邊拿著聖經說同性戀是罪，一邊又在這裡扮好人。你這種牆頭草的態度，比耀祖的粗暴更虛偽、更噁心！」",
+            bg: "url('images/bg5.png')",
+			chara: "yee"
+        },		
+		{
+            name: "耀祖",
+            text: "「無錯，可賓。你只是想做個兩邊討好人，你根本不明白我背負的家族壓力有多大！」",
+            bg: "url('images/bg5.png')",
+			chara: "yau"
+        },	
+		{
+            name: "",
+            text: "被好友大罵虛偽，關係決裂。下雨時經過學校操場，籃球架在風雨中獨自支撐著，好像失去朋友的自己。",
+            bg: "url('images/ed04.png')",
+			chara: "none"
+        }
+        
+    ],
+	
+	//D=Esced=ed01
+	D: [
+        {
+            name: "",
+            text: "【結局A：虛偽與逃避的代價】你在好友衝突時選擇了逃避...",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },
+		{
+            name: "依模",
+            text: "(冷笑一聲)「陳可賓，你嗰晚選擇逃避一走了之、唔理我哋……你根本無當過我哋係朋友！你嘅關心真係虛偽。」",
+            bg: "url('images/bg5.png')",
+			chara: "yee"
+        },		
+		{
+            name: "耀祖",
+            text: "(怒視)「兄弟最需要你嘅時候你轉身回家。算啦陳可賓，你呢種懦夫唔配做我兄弟！」",
+            bg: "url('images/bg5.png')",
+			chara: "yau"
+        },	
+		{
+            name: "",
+            text: "因為沒有勇氣表達立場，好友間的關係決裂。每次獨自乘輕鐵，面對空洞孤寂的月台，心中湧出無限後悔。",
+            bg: "url('images/ed01.png')",
+			chara: "none"
+        }
+        
+    ],
+	//E=Gded=ed05
+	E: [
+        {
+            name: "",
+            text: "【結局E(True Ending)：立場與愛心】堅定自己的立場，同時顧及他人感受",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },
+		{
+            name: "可賓",
+            text: "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },		
+		{
+            name: "可賓",
+            text: "「依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },	
+		{
+            name: "可賓",
+            text: "「我們十多年的感情，連一個真正坐低傾的機會都無嗎！」」",
+            bg: "url('images/bg5.png')",
+			chara: "none"
+        },		
+				{
+            name: "耀祖",
+            text: "(痛哭失聲)「依模……我真係好驚你被人當怪物欺負啊……」」",
+            bg: "url('images/bg5.png')",
+			chara: "yau"
+        },	
+		{
+            name: "依模",
+            text: "(崩潰大哭)「對唔住……耀祖……我好驚你哋唔要我啊……」",
+            bg: "url('images/bg5.png')",
+			chara: "yee"
+        },	
+		{
+            name: "",
+            text: "三人互相真誠說出心底話，彼此諒解及包容，雖然價值觀不同，仍然繼續友誼。",
+            bg: "url('images/ed05.png')",
+			chara: "none"
+        }
+        
+    ]
+	
+};
+
+
+function nextStep() {
+    if (story[step].choices || story[step].check) return;
+    if (step < story.length - 1) {
+        step++;
+        update();
+    }
+}
+
+// 🎭 控制立繪顯示與亮度的核心邏輯
+function setCharaDisplay(charaState) {
+    const yauImg = document.getElementById("chara-yau");
+    const yeeImg = document.getElementById("chara-yee");
+    
+    // 先移除所有狀態標籤
+    yauImg.className = "chara-img";
+    yeeImg.className = "chara-img";
+    
+    if (charaState === "yau") {
+        yauImg.classList.add("active");
+        yeeImg.classList.add("visible"); // 依模在場但處於暗色
+    } else if (charaState === "yee") {
+        yeeImg.classList.add("active");
+        yauImg.classList.add("visible"); // 耀祖在場但處於暗色
+    } else if (charaState === "both") {
+        yauImg.classList.add("visible");
+        yeeImg.classList.add("visible");
+    }
+    // "none" 則維持兩者完全隱藏 (opacity: 0)
+}
+
+function update() {
+    const node = story[step];
+    
+    // 🖼️ 變更背景圖
+    if (node.bg) {
+        document.getElementById("game-bg").style.backgroundImage = `url('${node.bg}')`;
+    }
+    
+    // 🎭 更新角色立繪
+    if (node.chara) {
+        setCharaDisplay(node.chara);
+    }
+    
+    if (node.stage) {
+        document.getElementById("stage-desc").innerText = node.stage;
+    }
+    
+    document.getElementById("char-name").innerText = node.name;
+    document.getElementById("dialogue").innerText = node.text;
+    document.getElementById("choices").innerHTML = "";
+
+    if (node.choices) {
+		document.getElementById("choices").style.display = "flex";
+	
+        node.choices.forEach(c => {
+            let b = document.createElement("div");
+            b.className = "btn";
+            b.innerText = c.text;
+            b.onclick = () => { c.effect(); step = c.next; update(); };
+            document.getElementById("choices").appendChild(b);
+        });
+    } else if (node.check) {
+		document.getElementById("choices").style.display = "flex";
+        if (escaped) {
+            
+			let c1 = document.createElement("div");
+            c1.className = "btn"; c1.innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」";
+            c1.onclick = () => { triggerEscapedBadEnd(); };
+            
+            let c2 = document.createElement("div");
+            c2.className = "btn"; c2.innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」";
+            c2.onclick = () => { triggerEscapedBadEnd(); };
+
+            let c3 = document.createElement("div");
+            c3.className = "btn"; c3.innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！十年的感情，連一個真正坐低傾的機會都無嗎？！」";
+            c3.onclick = () => { triggerEscapedBadEnd(); };
+
+            document.getElementById("choices").appendChild(c1);
+            document.getElementById("choices").appendChild(c2);
+            document.getElementById("choices").appendChild(c3);
+        } else {
+            let c1 = document.createElement("div");
+            c1.className = "btn"; c1.innerText = "「依模，對唔住。雖然這很殘忍，但我認同耀祖。聖經的最高心意確實是一男一女的婚姻，同性戀是罪。耀祖承受了這麼多家族壓力，他是為了保護你。如果你堅持不願意改變這種生活方式，我們……沒辦法回到過去了。」";
+            c1.onclick = () => { showEndingA(); };
+            
+            let c2 = document.createElement("div");
+            c2.className = "btn"; c2.innerText = "「耀祖，你太過分了。如果你傳統是要依模的整個人、逼她痛苦一輩子，我寧願不要這種傳統！依模，你沒有錯，做你自己！」";
+            c2.onclick = () => { showEndingB(); };
+
+            let c3 = document.createElement("div");
+            c3.className = "btn"; c3.innerText = "「耀祖！你明明是因為太害怕依模被村裡的人指指點點，為什麼不敢承認你是在用生命護著她？！依模！聖經的標準很高，但我信的神從來沒當你是垃圾，祂愛你，我也絕對不會拋棄你！十年的感情，連一個真正坐低傾的機會都無嗎？！」";
+            c3.onclick = () => { checkValuesForEndingCOrTrue(); };
+
+            document.getElementById("choices").appendChild(c1);
+            document.getElementById("choices").appendChild(c2);
+            document.getElementById("choices").appendChild(c3);
+        }
+    }
+}
+
+
+// 核心：修改後的 showEndingA 依然極簡
+function showEndingA() {
+    playEndingSequence(endingScripts.B);
+	document.getElementById("stage-desc").innerText = "結局 B：律法審判後的孤寂";
+}
+
+function showEndingB() {
+    playEndingSequence(endingScripts.C);
+	document.getElementById("stage-desc").innerText = "結局C：失去靈魂的自由";
+}
+
+function showEndingC() {
+    playEndingSequence(endingScripts.D);
+	document.getElementById("stage-desc").innerText = "結局D：虛偽橋樑的崩塌";	
+}
+
+function triggerEscapedBadEnd(){
+	playEndingSequence(endingScripts.A);
+	document.getElementById("stage-desc").innerText = "結局A：虛偽與逃避的代價";	
+}
+
+function showTrueEnding(){
+	playEndingSequence(endingScripts.E);
+    document.getElementById("stage-desc").innerText = "結局E(True Ending)：立場與愛心";
+}
+
+// 統一的結局播放器（整合重啟按鈕版）
+function playEndingSequence(scriptArray) {
+    let currentIndex = 0;
+    
+    // 隱藏原本的遊戲選項框
+    document.getElementById("choices").style.display = "none"; 
+	
+    // 渲染每一幕的函式
+    function renderStep() {
+        const currentScene = scriptArray[currentIndex];
+        document.getElementById("char-name").innerText = currentScene.name;
+        document.getElementById("dialogue").innerText = currentScene.text;
+        document.getElementById("game-bg").style.backgroundImage = currentScene.bg;
+    
+    
+	if (currentScene.chara) {
+            setCharaDisplay(currentScene.chara);
+        } else {
+            // 如果忘記寫，預設讓兩人都維持 visible 狀態作為安全防線
+            setCharaDisplay("both");
+        }
+	}
+    // 初始化第一幕
+    renderStep();
+    
+    // 綁定對話框點擊事件
+    const textbox = document.getElementById("textbox");
+    textbox.onclick = function() {
+        currentIndex++;
+        
+        if (currentIndex < scriptArray.length) {
+            // 還有下一幕，繼續播放故事
+            renderStep();
+        } else {
+            // 📖 故事播完了！
+            
+            // 1. 鎖死對話框點擊，防止玩家重複點擊
+            textbox.onclick = null;
+            textbox.style.cursor = "default";
+            
+            // 2. 調用重啟按鈕函式
+            showRestartButton();
+        }
+    };
+}
+
+// 🔄 顯示重頭遊玩按鈕的函式
+function showRestartButton() {
+    const choicesContainer = document.getElementById("choices");
+    
+    // 清空原本的選項內容（防止殘留舊選項）
+    choicesContainer.innerHTML = "";
+    
+    // 創建一個新的「重新開始」按鈕
+    const restartBtn = document.createElement("div");
+    restartBtn.className = "btn";
+    restartBtn.innerText = "返回起初，重頭遊玩";
+    
+    // 點擊按鈕時觸發遊戲重置
+    restartBtn.onclick = function() {
+		love = 0; truth = 0; escaped = false; step = 0; 
+        restartGame();
+    };
+    
+    // 將按鈕塞入選項容器並顯示出來
+    choicesContainer.appendChild(restartBtn);
+    choicesContainer.style.display = "flex";
+}
+
+function checkValuesForEndingCOrTrue() {
+    if (love >= 4 && truth >= 4) {
+        love += 2; truth += 1;
+        showTrueEnding();
+    } else {
+        showEndingC();
+    }
+}
+
+
+function startGameProcess() {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("textbox").style.display = "block";
+    update(); 
+}
+
+function restartGame() {
+    const textbox = document.getElementById("textbox");
+	textbox.onclick = nextStep;
+    textbox.style.cursor = "pointer";
+    textbox.style.display = "none"; 
+    
+    document.getElementById("choices").style.display = "none";
+    document.getElementById("chara-yau").className = "chara-img";
+    document.getElementById("chara-yee").className = "chara-img";
+    document.getElementById("stage-desc").innerText = "";
+    
+    const startScreen = document.getElementById("start-screen");
+    startScreen.style.display = "flex";
+    startScreen.style.opacity = "1";
+}
+
+
+
+
+	
+	
+// 📱 自動等比例縮放黑科技
+function resizeGame() {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const scaleX = windowWidth / 1024;
+    const scaleY = windowHeight / 576;
+    const scale = Math.min(scaleX, scaleY, 1); 
+    document.documentElement.style.setProperty('--game-scale', scale);
+}
+
+// ⏳ 綁定初始化與封面監聽
+window.addEventListener('DOMContentLoaded', () => {
+    resizeGame(); 
+    document.getElementById("start-btn").onclick = startGameProcess;
+});
+
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', resizeGame);
+</script>
+</body>
+</html>
